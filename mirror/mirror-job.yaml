@@ -1,0 +1,75 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mirror
+spec:
+  template:
+    spec:
+      containers:
+        - name: sync-images
+          image: quay.io/lshakesp/quay-mirror:latest
+          command: ["/script/mirror.sh"]
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            - name: SOURCE
+              valueFrom:
+                secretKeyRef:
+                  name: repositories
+                  key: SOURCE
+            - name: DEST
+              valueFrom:
+                secretKeyRef:
+                  name: repositories
+                  key: DEST
+            - name: NAMESPACE
+              valueFrom:
+                secretKeyRef:
+                  name: repositories
+                  key: NAMESPACE
+            - name: AUTHFILE
+              valueFrom:
+                secretKeyRef:
+                  name: repositories
+                  key: AUTHFILE
+            - name: OAUTH
+              valueFrom:
+                secretKeyRef:
+                  name: repositories
+                  key: OAUTH
+            - name: EXTRA_ARGS
+              valueFrom:
+                secretKeyRef:
+                  name: repositories
+                  key: EXTRA_ARGS
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: script
+              mountPath: /script
+      volumes:
+        - name: config
+          secret:
+            secretName: config      # pragma: allowlist secret
+            items:
+              - key: 'auth.json'
+                path: auth.json
+        - name: auth
+          secret:
+            secretName: auth        # pragma: allowlist secret
+            items:
+              - key: 'auth.json'
+                path: config.json
+        - name: script
+          configMap:
+            name: mirror-script
+            defaultMode: 0550
+      restartPolicy: Never
+  backoffLimit: 0

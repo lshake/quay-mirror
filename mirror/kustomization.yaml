@@ -1,0 +1,9 @@
+---
+resources:
+  - mirror-job.yaml
+  - mirror-secrets.yaml
+  - registry-secrets.yaml
+configMapGenerator:
+  - name: mirror-script
+    files:
+      - ./mirror.sh
