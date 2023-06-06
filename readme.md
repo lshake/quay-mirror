@@ -13,7 +13,7 @@ export NAMESPACE='ocp4'
 export RETRIES='3'
 export ATTEMPTS='3'
 export EXTRA_ARGS=''
-export AUTHFILE='$(pwd)/auth.json'
+export AUTHFILE=$(pwd)/auth.json
 
 podman login --authfile ./auth.json quay-source.example.com
 podman login --authfile ./auth.json destination.example.com
