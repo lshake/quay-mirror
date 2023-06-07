@@ -4,6 +4,7 @@
 
 SOURCE=${SOURCE:='source.example.com'}
 DEST=${DEST:='dest.example.com'}
+DEST_PROTOCOL=${DEST_PROTOCOL:='docker'}
 OAUTH=${OAUTH:='myquayaouthtoken'}
 NAMESPACE=${NAMESPACE:='mynamespace'}
 
@@ -44,9 +45,16 @@ get_tags () {
 	local newtags=()
 	local page=1
 	local morepages=true
+	local tagfilter=""
+
+	if [ ! -z $TAG_FILTER ]
+	then
+		tagfilter="&filter_tag_name=${TAG_FILTER}"
+	fi
+
 	while [ "$morepages" = true ]
 	do
-		request=$(curl -s -X GET -H "Authorization: Bearer $OAUTH" "https://$SOURCE/api/v1/repository/$NAMESPACE/$r/tag/?page=$page&limit=100")
+		request=$(curl -s -X GET -H "Authorization: Bearer $OAUTH" "https://$SOURCE/api/v1/repository/$NAMESPACE/$r/tag/?page=$page&limit=100$tagfilter")
 		readarray -t newtags < <(echo $request | jq -r '.tags[] | .name')
 		if (( ${#newtags[@]} > 0 ))
 		then
@@ -70,7 +78,7 @@ main () {
 			retval=99
 			for ((pass=1;pass<=${ATTEMPTS};pass++))
 			do
-				skopeo sync $EXTRA_ARGS --authfile $AUTHFILE --retry-times $RETRIES --all --src docker --dest docker $SOURCE/$NAMESPACE/$r $DEST/$NAMESPACE/$r
+				skopeo sync $EXTRA_ARGS --authfile $AUTHFILE --retry-times $RETRIES --all --src docker --dest $DEST_PROTOCOL $SOURCE/$NAMESPACE/$r $DEST/$NAMESPACE/$r
 				retval=$?
 				if  [[ $retval -eq 0 ]]
 				then

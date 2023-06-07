@@ -1,0 +1,8 @@
+---
+resources:
+- ../to-mirror
+- ./persistent-volume.yaml
+- ./persistent-volume-claim.yaml
+
+patchesStrategicMerge:
+- ./mirror-job.yaml

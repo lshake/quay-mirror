@@ -1,0 +1,23 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mirror
+spec:
+  template:
+    spec:
+      containers:
+        - name: sync-images
+          env:
+          - name: DEST
+            value: '/dest'
+            valueFrom: null
+          - name: DEST_PROTOCOL
+            value: 'dir'
+          volumeMounts:
+            name: dest
+            mountPath: /dest
+      volumes:
+        - name: dest
+          persistentVolumeClaim:
+            claimName: mirror
