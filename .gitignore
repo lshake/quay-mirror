@@ -20,6 +20,7 @@ Thumbs.db
 
 # VSCode workspace files
 *.code-workspace
+.vscode
 
 # Log files
 *.log
